@@ -1,0 +1,17 @@
+# 核心
+numpy
+pandas
+scikit-learn
+joblib
+
+# 深度學習模型 (.pt)
+torch
+
+# Explainability
+shap
+
+# Inference 介面
+streamlit
+
+# 取得 UCI 真實資料 (可選；無法安裝時 train_placeholder 會改用合成資料)
+ucimlrepo

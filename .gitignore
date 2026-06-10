@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# 模型產出 (由 train script 生成，不入庫；改放 release 或雲端)
+models/*.pt
+models/*.joblib
+
+# 推論紀錄 (可能含敏感資訊)
+results/inference_log.jsonl
+
+# 系統檔
+.DS_Store
+.ipynb_checkpoints/
