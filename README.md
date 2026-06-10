@@ -94,18 +94,67 @@ student-dropout-prediction/
 > 以下為待填樣板，可自行調整。
 
 - **Dataset name**: Predict Students' Dropout and Academic Success
-- **Dataset source**: UCI ML Repository (ID 697)
-- **Dataset size**: _TODO（筆數、欄位數）_
-- **Feature description**: 36 個特徵，見 `src/schema.py`（入學、課業、背景、總體經濟）
-- **Target labels**: Dropout / Enrolled / Graduate
-- **Data preprocessing**: _TODO（編碼、標準化、切分方式）_
-- **Sensitive attributes**: Gender, Age at enrollment, Nacionality, Scholarship holder
-- **Privacy risks**: _TODO_
-- **Bias risks**: _TODO_
-- **Data leakage risks**: _TODO（第二學期成績是否洩漏結果？）_
-- **Intended use**: 早期介入輔導
-- **Prohibited use**: 不可作為學業/紀律/註冊決策唯一依據
-- **Dataset limitations**: _TODO_
+
+- **Dataset source**: UCI Machine Learning Repository (Dataset ID 697)
+
+- **Dataset size**:
+  - Instances: 4,424 students
+  - Features: 36 input variables
+  - Target classes: Dropout, Enrolled, Graduate
+
+- **Feature description**:
+  36 features covering:
+  - Student demographics (e.g., Gender, Age at enrollment, Nationality)
+  - Academic background (e.g., Admission grade, Previous qualification grade)
+  - Family and socioeconomic information
+  - Academic performance (1st and 2nd semester curricular units)
+  - Macroeconomic indicators (GDP, Inflation rate, Unemployment rate)
+
+- **Target labels**:
+  - Dropout
+  - Enrolled
+  - Graduate
+
+- **Data preprocessing**:
+  1. Removed missing values and duplicate records.
+  2. Converted the original three-class target into a binary classification task:
+     - Dropout
+     - Non-Dropout (Enrolled + Graduate)
+  3. Standardized numerical features using feature scaling.
+  4. Applied SMOTETomek to address class imbalance.
+  5. Performed train-test split and 5-fold stratified cross-validation during model development.
+  6. Constructed additional engineered features, including:
+     - 1st semester pass rate
+     - 2nd semester pass rate
+     - Grade change
+
+- **Sensitive attributes**:
+  - Tuition fees up to date
+
+- **Privacy risks**:
+  The feature *"Tuition fees up to date"* reflects a student's financial status and may be considered sensitive personal information. Although the dataset does not contain direct identifiers such as names or student IDs, combining this feature with other demographic or academic information could increase the risk of inferring an individual's financial circumstances. Therefore, appropriate access controls and data protection measures should be applied when using or sharing the dataset.
+
+- **Bias risks**:
+  The feature *"Tuition fees up to date"* may indirectly capture students' socioeconomic conditions. If the model relies heavily on this feature, economically disadvantaged students could be systematically assigned higher dropout risk scores. As a result, model predictions should be used to provide additional support and intervention opportunities rather than to restrict educational access or impose penalties.
+
+- **Intended use**:
+  Early identification of students at risk of dropping out, enabling academic counseling, financial support, and targeted intervention programs.
+
+- **Prohibited use**:
+  The model should not be used as the sole basis for:
+  - Academic dismissal decisions
+  - Enrollment eligibility decisions
+  - Scholarship allocation decisions
+  - Disciplinary actions
+  - Any automated decision affecting student rights without human review
+
+- **Dataset limitations**:
+  1. Data were collected from a single higher education institution, limiting generalizability to other universities or countries.
+  2. The dataset reflects a specific educational and socioeconomic context that may not represent broader student populations.
+  3. Important factors influencing dropout behavior (e.g., mental health, motivation, family support, learning engagement) are not included.
+  4. Macroeconomic variables are coarse-grained and may not accurately capture individual financial circumstances.
+  5. The presence of second-semester academic variables may reduce the applicability of the model for truly early-stage intervention.
+  6. Class distributions are imbalanced, requiring resampling and weighting techniques that may affect model stability.
 
 ---
 
