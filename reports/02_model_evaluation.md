@@ -11,7 +11,7 @@
 
 ## 3. MLP + MinDiff
 - **敏感屬性**：`Tuition fees up to date` (學費是否按時繳納)。此特徵直接代理了學生的社會經濟地位（Socioeconomic Status），用以防範演算法產生財務階層歧視。
-- **Total Loss** = Classification Loss (Focal Loss) + $\lambda$ × Fairness Loss (MMD Loss)； $\lambda$ (即$\beta$) = `1.3321` *(此為 Optuna 在 5-Fold 交叉驗證下，歷經 15 次貝氏嘗試所尋獲之兼顧準確度與公平性的黃金客觀超參數)*。
+- **Total Loss** = Classification Loss (Focal Loss) + $\lambda$ × Fairness Loss (MMD Loss)； $\lambda$ (即 $\beta$ ) = `1.3321` *(此為 Optuna 在 5-Fold 交叉驗證下，歷經 15 次貝氏嘗試所尋獲之兼顧準確度與公平性的黃金客觀超參數)*。
 
 ## 4. 評估指標
 Accuracy / Precision / Recall / Macro F1 / Weighted F1 / **Dropout Recall** / Confusion Matrix
