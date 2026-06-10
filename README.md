@@ -93,68 +93,81 @@ student-dropout-prediction/
 
 > 以下為待填樣板，可自行調整。
 
-- **Dataset name**: Predict Students' Dropout and Academic Success
+## Data Card（資料卡）
 
-- **Dataset source**: UCI Machine Learning Repository (Dataset ID 697)
+* **資料集名稱（Dataset name）**：
+  Predict Students' Dropout and Academic Success
 
-- **Dataset size**:
-  - Instances: 4,424 students
-  - Features: 36 input variables
-  - Target classes: Dropout, Enrolled, Graduate
+* **資料來源（Dataset source）**：
+  UCI Machine Learning Repository（Dataset ID 697）
 
-- **Feature description**:
-  36 features covering:
-  - Student demographics (e.g., Gender, Age at enrollment, Nationality)
-  - Academic background (e.g., Admission grade, Previous qualification grade)
-  - Family and socioeconomic information
-  - Academic performance (1st and 2nd semester curricular units)
-  - Macroeconomic indicators (GDP, Inflation rate, Unemployment rate)
+* **原始資料集規模（Dataset size）**：
 
-- **Target labels**:
-  - Dropout
-  - Enrolled
-  - Graduate
+  * 資料筆數（Instances）：4,424 位學生
+  * 特徵數量（Features）：36 個輸入變數
+  * 目標類別（Target classes）：Dropout、Enrolled、Graduate
 
-- **Data preprocessing**:
-  1. Removed missing values and duplicate records.
-  2. Converted the original three-class target into a binary classification task:
-     - Dropout
-     - Non-Dropout (Only Graduate)
-  3. Standardized numerical features using feature scaling.
-  4. Applied SMOTETomek to address class imbalance.
-  5. Performed train-test split and 5-fold stratified cross-validation during model development.
-  6. Constructed additional engineered features, including:
-     - 1st semester pass rate
-     - 2nd semester pass rate
-     - Grade change
+* **特徵描述（Feature description）**：
+  36 個特徵涵蓋以下面向：
 
-- **Sensitive attributes**:
-  - Tuition fees up to date
+  * 學生人口統計資訊（例如：性別、入學年齡、國籍）
+  * 學術背景（例如：入學成績、前一學歷成績）
+  * 家庭與社經背景資訊
+  * 學業表現（第一、二學期課程相關資訊）
+  * 總體經濟指標（GDP、通貨膨脹率、失業率）
 
-- **Privacy risks**:
-  The feature *"Tuition fees up to date"* reflects a student's financial status and may be considered sensitive personal information. Although the dataset does not contain direct identifiers such as names or student IDs, combining this feature with other demographic or academic information could increase the risk of inferring an individual's financial circumstances. Therefore, appropriate access controls and data protection measures should be applied when using or sharing the dataset.
+* **原始目標標籤（Target labels）**：
 
-- **Bias risks**:
-  The feature *"Tuition fees up to date"* may indirectly capture students' socioeconomic conditions. If the model relies heavily on this feature, economically disadvantaged students could be systematically assigned higher dropout risk scores. As a result, model predictions should be used to provide additional support and intervention opportunities rather than to restrict educational access or impose penalties.
+  * Dropout（退學）
+  * Enrolled（在學）
+  * Graduate（畢業）
 
-- **Intended use**:
-  Early identification of students at risk of dropping out, enabling academic counseling, financial support, and targeted intervention programs.
+* **資料前處理（Data preprocessing）**：
 
-- **Prohibited use**:
-  The model should not be used as the sole basis for:
-  - Academic dismissal decisions
-  - Enrollment eligibility decisions
-  - Scholarship allocation decisions
-  - Disciplinary actions
-  - Any automated decision affecting student rights without human review
+  1. 移除缺失值與重複資料。
+  2. 將原始三分類目標轉換為二元分類問題：
 
-- **Dataset limitations**:
-  1. Data were collected from a single higher education institution, limiting generalizability to other universities or countries.
-  2. The dataset reflects a specific educational and socioeconomic context that may not represent broader student populations.
-  3. Important factors influencing dropout behavior (e.g., mental health, motivation, family support, learning engagement) are not included.
-  4. Macroeconomic variables are coarse-grained and may not accurately capture individual financial circumstances.
-  5. The presence of second-semester academic variables may reduce the applicability of the model for truly early-stage intervention.
-  6. Class distributions are imbalanced, requiring resampling and weighting techniques that may affect model stability.
+     * Dropout（退學）
+     * Non-Dropout（僅包含 Graduate）
+  3. 對數值型特徵進行標準化處理（Feature Scaling）。
+  4. 使用 SMOTETomek 方法處理類別不平衡問題。
+  5. 在模型開發過程中進行訓練集／測試集切分，以及 5 折分層交叉驗證（5-Fold Stratified Cross-Validation）。
+  6. 建立額外的特徵工程變數，包括：
+
+     * 第一學期課程通過率（1st semester pass rate）
+     * 第二學期課程通過率（2nd semester pass rate）
+     * 成績變化量（Grade change）
+
+* **敏感屬性（Sensitive attributes）**：
+
+  * Tuition fees up to date（學費是否按時繳交）
+
+* **隱私風險（Privacy risks）**：
+  「學費是否按時繳交（Tuition fees up to date）」反映學生的財務狀況，因此可視為敏感個人資訊。雖然資料集中不包含姓名、學號等直接識別資訊，但若與其他人口統計或學業資料結合，仍可能提高推測個人經濟狀況的風險。因此，在資料使用與分享過程中，應採取適當的存取控制與資料保護措施。
+
+* **偏誤風險（Bias risks）**：
+  「學費是否按時繳交（Tuition fees up to date）」可能間接反映學生的社經地位。若模型過度依賴此特徵，經濟弱勢學生可能被系統性地判定為較高的退學風險。因此，模型預測結果應作為提供額外支持與介入措施的參考依據，而非作為限制教育機會或施加處分的工具。
+
+* **預期用途（Intended use）**：
+  用於及早識別具有退學風險的學生，以協助學校提供學業輔導、經濟補助及其他針對性的支持措施。
+
+* **禁止用途（Prohibited use）**：
+  本模型不得作為以下決策的唯一依據：
+
+  * 學生退學或開除決策
+  * 入學資格審核
+  * 獎學金分配
+  * 紀律處分
+  * 任何影響學生權益且未經人工審查的自動化決策
+
+* **資料集限制（Dataset limitations）**：
+
+  1. 資料來自單一高等教育機構，因此模型結果未必能推廣至其他學校或國家。
+  2. 資料反映特定教育制度與社會經濟環境，可能無法完全代表其他學生族群。
+  3. 影響退學的重要因素（如心理健康、學習動機、家庭支持及學習投入程度）並未納入資料集中。
+  4. 總體經濟變數屬於宏觀指標，無法精確反映個別學生的財務狀況。
+  5. 第二學期學業表現相關特徵的存在，可能降低模型在真正早期預警情境中的適用性。
+  6. 原始資料存在類別不平衡問題，因此需透過重採樣與加權方法進行調整，可能影響模型的穩定性與泛化能力。
 
 ---
 
