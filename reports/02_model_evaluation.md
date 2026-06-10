@@ -2,7 +2,7 @@
 
 ## 1. Baseline
 - **模型**：Logistic Regression（5-Fold 交叉驗證整合體）
-- **超參數**：`solver='liblinear'`, `random_state=42`, `C=1.0` (預設值)，並在 `train_scaled.csv` 內部進行 5 折分層切分與軟投票（Soft Voting）整合預測。
+- **超參數**：`solver='liblinear'`, `random_state=42`, `C=1.0` (預設值)，並在 `train_scaled.csv` 內部進行 5 折分層切分整合預測。
 
 ## 2. MLP
 - **架構**：Input (14) → Linear(64) → BatchNorm1d → ReLU → Dropout(0.4) → Linear(32) → BatchNorm1d → ReLU → Dropout(0.3) → Linear(16) → ReLU → Linear(1)。*(註：配合二分類任務與 Focal Loss 實作優化，輸出層採單神經元 Logits 輸出，本質與三分類預估完全相容)*。
