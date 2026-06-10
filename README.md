@@ -111,8 +111,6 @@ student-dropout-prediction/
 
 # 📋 Model Card（組員 B 113AB8046 填寫）
 
-# 📋 Model Card（組員 B 113AB8046 填寫）
-
 - **Model name**: Fair-Predict Student Retention Model (公平導向型學生退學預警模型)
 - **Model version**: `1.0.0` *(已同步更新至 `src/schema.py` 中的 `MODEL_VERSION`)*
 - **Model architecture**: 深度前饋神經網路 (Multi-Layer Perceptron, MLP)
