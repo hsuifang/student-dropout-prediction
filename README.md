@@ -125,9 +125,9 @@ student-dropout-prediction/
 
 | Model Stage | Accuracy | Macro F1 | Dropout Recall | ROC-AUC (整合測試集) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Baseline** (5-Fold 邏輯回歸) | 0.93 | 0.93 | 0.89 | 0.9684 |
-| **MLP** (純深度學習神經網路) | 0.94 | 0.94 | 0.92 | **0.9734** |
-| **MLP + MinDiff** (Optuna 終極體) | 0.90 | 0.90 | 0.88 | 0.9495 |
+| **Baseline** (5-Fold 邏輯回歸) | 0.94 | 0.93 | 0.90 | 0.9685 |
+| **MLP** (5-Fold) | 0.94 | 0.92 | 0.90 | **0.9730** |
+| **MLP + MinDiff** (Optuna調整參數) | 0.92 | 0.91 | 0.90 | 0.9485 |
 
 > 💡 **5-Fold 內部驗證穩定度穩定度**
 > * **MLP + MinDiff 內部平均驗證 AUC**: $0.9412 \pm 0.0146$
