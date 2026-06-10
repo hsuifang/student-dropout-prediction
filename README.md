@@ -119,7 +119,7 @@ student-dropout-prediction/
   1. Removed missing values and duplicate records.
   2. Converted the original three-class target into a binary classification task:
      - Dropout
-     - Non-Dropout (Enrolled + Graduate)
+     - Non-Dropout (Only Graduate)
   3. Standardized numerical features using feature scaling.
   4. Applied SMOTETomek to address class imbalance.
   5. Performed train-test split and 5-fold stratified cross-validation during model development.
