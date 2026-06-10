@@ -130,14 +130,14 @@ student-dropout-prediction/
 | **MLP + MinDiff** (Optuna調整參數) | 0.92 | 0.91 | 0.90 | 0.9485 |
 
 > 💡 **5-Fold 內部驗證穩定度穩定度**
-> * **MLP + MinDiff 內部平均驗證 AUC**: $0.9412 \pm 0.0146$
+> * **MLP + MinDiff 內部平均驗證 AUC**: $0.9268 \pm 0.0146$
 > * **MLP + MinDiff 內部平均驗證 Gap**: $22.67\% \pm 18.32\%$
 
 - **Fairness results**: 
   本專案選定 `Tuition fees up to date`（學費是否按時繳納）作為受保護之**敏感屬性（Protected Attribute）**。用以衡量模型是否對經濟弱勢學生產生嚴重的系統性歧視。
   
   * **Baseline (FPR Gap)**: **62.54%** 🚨 *(敏感群體 FPR: 66.67% / 對照群體 FPR: 4.13%)*
-  * **Pure MLP (FPR Gap)**: **61.62%** 🚨 *(敏感群體 FPR: 66.67% / 對照群體 FPR: 5.05%)*
+  * **Pure MLP (FPR Gap)**: **78.52%** 🚨 *(敏感群體 FPR: 83.33% / 對照群體 FPR: 4.82%)*
   * **MLP + MinDiff (FPR Gap)**: 👑 **8.18%** ✨ *(敏感群體 FPR: 16.67% / 對照群體 FPR: 8.49%)*
   
   **去偏誤成效洞察：**  
