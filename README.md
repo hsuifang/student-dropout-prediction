@@ -99,8 +99,6 @@ student-dropout-prediction/
 
 # 📋 Data Card（組員 A 113AB8049 填寫）
 
-> 以下為待填樣板，可自行調整。
-
 ## Data Card（資料卡）
 
 * **資料集名稱（Dataset name）**：
