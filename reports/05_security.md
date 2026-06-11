@@ -3,6 +3,9 @@
 對應需求書第 11 節。實作於 `src/security.py`，呈現於 `app/streamlit_app.py`。
 README 有摘要表，本檔放完整風險說明與控制細節。
 
+> 本檔的 Input Validation 與 Inference Log 屬於完整推論流程的一環；
+> 整體流程（輸入 → 驗證 → 推論 → 解釋 → 顯示）見根目錄 README「推論流程 · Inference Flow」。
+
 ## 風險登錄表
 
 | # | 風險 | 說明 | 控制方式 | 對應實作 | 狀態 |

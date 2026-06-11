@@ -10,29 +10,72 @@
 
 ---
 
-## 快速開始
+## 快速開始 · How to Use
 
+### Step 1 — 安裝環境 (Setup)
 ```bash
-# 1. 安裝套件 (建議使用虛擬環境)
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate   # 建議使用虛擬環境
 pip install -r requirements.txt
-
-# 2. 訓練 placeholder 模型 -> 產出 models/model.pt
-python -m scripts.train_placeholder
-
-# 3. 啟動 Inference 介面
-streamlit run app/streamlit_app.py
 ```
 
-> ⚠️ `models/model.pt` 目前為 **placeholder**（佔位模型），僅供串接介面與 demo。
-> 正式效能以組員 B 訓練的模型為準，替換 `models/model.pt` 即可，介面不需修改。
+### Step 2 — 準備模型 (Get a model) — **二選一**
+兩種方式都會產出 `models/model.pt` + `models/preprocessor.joblib`，皆符合推論契約、`load_checkpoint` 可直接載入，**介面不需修改**。
 
-### 介面預覽（Inference 介面）
+```bash
+# A) 佔位模型：不需真實資料，最快，先把介面跑起來看 / demo 流程
+python -m scripts.train_placeholder
 
-面向教師／導師的早期預警決策支援介面：左側輸入學生資料，右側即時呈現
+# B) 正式模型：需要真實 data.csv（含 Target 欄；不在 repo 內，請自行放置）
+python -m scripts.export_model --data notebooks/data.csv
+```
+
+| | A. `train_placeholder` | B. `export_model` |
+| --- | --- | --- |
+| 資料 | 合成 / UCI（不需 `data.csv`） | 真實 `data.csv` |
+| 模型 | 佔位「假模型」，預測無意義 | 正式模型 |
+| 方法 | 普通 BCE | Focal + MinDiff，**5-fold soft-voting ensemble**（= 報告中那一顆，方法與組員 B 的 notebook 一致） |
+| 用途 | 沒資料也能跑介面 | 正式展示 / 上線 |
+
+> 💡 `export_model` 產出的 5 顆成員以 soft-voting 整合、序列化為單一 `models/model.pt`；
+> 推論層 (`src/inference`) 透過 `EnsembleMLP` 自動做機率平均，介面與推論程式皆不需修改。
+
+### Step 3 — 啟動介面 (Run the app)
+```bash
+streamlit run app/streamlit_app.py     # 開瀏覽器 http://localhost:8501
+```
+操作：左側填入學生資料 → 按 **Run Assessment** → 右側即時呈現
 **風險等級 → 建議行動 → 主要風險因子 → 各類別機率**，並顯示使用限制與人工審核提醒。
 
-![Dropout Risk Prediction interface](results/main.png)
+<p align="center">
+  <img src="results/main.png" alt="Dropout Risk Prediction interface" width="527">
+</p>
+
+### Step 4 —（選用）產生全域解釋圖
+```bash
+python -m scripts.plot_global_importance       # → results/global_importance.png
+```
+
+> ⚠️ 用 A 跑出來的 `models/model.pt` 為 **placeholder**，僅供串接介面與 demo；
+> 正式效能請用 B（或替換成組員 B 訓練好的權重），介面與推論層皆不需更動。
+
+---
+
+## 推論流程 · Inference Flow
+
+介面（`app/`）不做 ML，只收輸入、串流程、顯示；推論與解釋都委派給 `src/`：
+
+```
+填表(11 欄) → ① validate_input → ② predict → ③ explain_record → interpret 翻成人話 → 顯示＋log
+              (security)         (inference)   (explain)
+```
+
+| 模組 | 職責 |
+| --- | --- |
+| `inference.py` | **風險多高** — 前處理(11→14)＋模型(DropoutMLP/EnsembleMLP) → 機率 / 風險等級 |
+| `explain.py` | **為什麼** — 各特徵推高/降低退學風險的貢獻（SHAP / 梯度後援） |
+| `interpret.py`／`security.py` | 數字翻成人話 ／ 輸入驗證＋去識別化 log |
+
+> 💡 介面只依賴 `predict()` / `explain_record()` 兩個介面 → 模型從單顆換成 **5-fold ensemble**，`inference / explain / app` 一行未改。
 
 ---
 
@@ -48,9 +91,12 @@ student-dropout-prediction/
 │   ├── preprocessing.py     # scaler 建立/載入 (防 training-serving skew)
 │   ├── inference.py         # 載入模型 + 預測 + 風險等級
 │   ├── explain.py           # SHAP / 梯度後援 (Explainability)
+│   ├── interpret.py         # 把模型輸出翻成教師可讀的風險因子 / 建議行動
 │   └── security.py          # Input Validation / 去識別化 / Inference Log
 ├── scripts/
-│   └── train_placeholder.py # 訓練佔位模型 -> models/model.pt
+│   ├── train_placeholder.py # 佔位模型 (合成資料, demo 用)
+│   ├── export_model.py      # 正式模型 (真實資料, 5-fold MinDiff ensemble)
+│   └── plot_global_importance.py # 全域解釋圖 -> results/global_importance.png
 ├── app/
 │   └── streamlit_app.py     # Inference 介面 (組員 C 主要交付)
 ├── models/                  # model.pt / preprocessor.joblib (生成物)
@@ -67,9 +113,12 @@ student-dropout-prediction/
 只要遵守以下兩點，`models/model.pt` 可直接替換、前端無需改動：
 
 1. **特徵順序與標籤** 來自 `src/schema.py`（`FEATURE_ORDER`、`LABELS`）。
-2. **checkpoint 格式** 使用 `src/model.py` 的 `save_checkpoint(...)`，包含
-   `state_dict / input_dim / hidden_dims / num_classes / dropout / model_version / label_names`，
-   並一併輸出對應的 `models/preprocessor.joblib`。
+2. **checkpoint 格式** 使用 `src/model.py` 的存檔函式，並一併輸出對應的 `models/preprocessor.joblib`：
+   - 單一模型 `save_checkpoint(...)`：
+     `state_dict / input_dim / dropout_1 / dropout_2 / num_classes / model_version / label_names`
+   - 5-fold ensemble `save_ensemble_checkpoint(...)`：
+     `ensemble（各成員 state_dict）/ num_members / input_dim / dropout_1 / dropout_2 / num_classes / model_version / label_names`
+   - `load_checkpoint(...)` 會自動辨識上述兩種格式，前端與推論層皆不需更動。
 
 ---
 

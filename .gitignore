@@ -20,3 +20,12 @@ notebooks/*.csv
 # 系統檔
 .DS_Store
 .ipynb_checkpoints/
+
+# 編輯器 / 工具 / 環境 (本專案以 requirements.txt 為主，下列不入庫)
+.claude/
+.python-version
+pyproject.toml
+uv.lock
+skills-lock.json
+notebooks/風險學生期末_ifang.ipynb
+README copy.md

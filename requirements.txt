@@ -9,6 +9,7 @@ torch
 
 # Explainability
 shap
+matplotlib
 
 # Inference 介面
 streamlit
