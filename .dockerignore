@@ -1,0 +1,31 @@
+# 版本控制 / 虛擬環境 / 快取
+.git
+.gitignore
+.venv
+venv
+env
+__pycache__
+*.py[cod]
+
+# 編輯器 / 工具
+.claude
+.python-version
+pyproject.toml
+uv.lock
+skills-lock.json
+README copy.md
+
+# 不需進映像（縮小體積、加速 build）
+notebooks
+docs
+reports
+
+# 🔒 隱私：原始 / 處理後的學生資料絕不打包進映像
+data.csv
+*_scaled.csv
+notebooks/*.csv
+
+# 推論紀錄（執行期生成，可能含敏感資訊）
+results/inference_log.jsonl
+
+# 注意：models/ 不排除 —— 要把訓練好的 model.pt + preprocessor.joblib 打包進映像
