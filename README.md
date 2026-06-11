@@ -6,6 +6,8 @@
 **二分類任務（Dropout 退學 vs Graduate 畢業，已移除 Enrolled 在學樣本）**，
 並涵蓋 Explainability、Security、Fairness 與可操作的 Inference 介面。
 
+> **Live Demo**：<https://huggingface.co/spaces/hsuifang/student-dropout-prediction>
+>
 > 資料集：[UCI – Predict students' dropout and academic success](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success)
 
 ---
