@@ -22,12 +22,29 @@ HUMAN_REVIEW_WARNING = (
 _NUMERIC_BOUNDS = {
     "Admission grade": (0, 200),
     "Previous qualification (grade)": (0, 200),
-    "Age at enrollment": (15, 80),
     "Curricular units 1st sem (grade)": (0, 20),
     "Curricular units 2nd sem (grade)": (0, 20),
+    "Curricular units 1st sem (approved)": (0, 30),
+    "Curricular units 2nd sem (approved)": (0, 30),
+    "Curricular units 1st sem (enrolled)": (0, 30),
+    "Curricular units 2nd sem (enrolled)": (0, 30),
+    "Scholarship holder": (0, 1),
+    "Tuition fees up to date": (0, 1),
 }
 _DEFAULT_NUM_BOUNDS = (0, 1000)
 _DEFAULT_CAT_BOUNDS = (0, 99999)
+
+# 跨欄位邏輯規則: (子集欄位, 母集欄位) — 通過科目數不可超過修課科目數。
+_SUBSET_RULES = [
+    ("Curricular units 1st sem (approved)", "Curricular units 1st sem (enrolled)"),
+    ("Curricular units 2nd sem (approved)", "Curricular units 2nd sem (enrolled)"),
+]
+
+
+def bounds_for(feat: dict) -> tuple[float, float]:
+    """回傳欄位的 (min, max) 合理範圍；前端與驗證共用同一份來源，避免分歧。"""
+    default = _DEFAULT_CAT_BOUNDS if feat["kind"] == "cat" else _DEFAULT_NUM_BOUNDS
+    return _NUMERIC_BOUNDS.get(feat["name"], default)
 
 
 def validate_input(record: dict) -> list[str]:
@@ -36,21 +53,30 @@ def validate_input(record: dict) -> list[str]:
     for feat in FEATURE_SCHEMA:
         name = feat["name"]
         if name not in record:
-            errors.append(f"缺少欄位: {name}")
+            errors.append(f"Missing field: {name} · 缺少欄位")
             continue
         value = record[name]
         try:
             num = float(value)
         except (TypeError, ValueError):
-            errors.append(f"{name} 必須是數值，收到: {value!r}")
+            errors.append(f"{name} must be a number (got {value!r}) · 必須是數值")
             continue
         if feat["kind"] == "cat" and num != int(num):
-            errors.append(f"{name} 為類別欄位，必須是整數，收到: {value!r}")
-        lo, hi = _NUMERIC_BOUNDS.get(
-            name, _DEFAULT_CAT_BOUNDS if feat["kind"] == "cat" else _DEFAULT_NUM_BOUNDS
-        )
+            errors.append(f"{name} must be a whole number (got {value!r}) · 類別欄位需為整數")
+        lo, hi = bounds_for(feat)
         if not (lo <= num <= hi):
-            errors.append(f"{name} 超出合理範圍 [{lo}, {hi}]，收到: {num}")
+            errors.append(f"{name} is out of range [{lo}, {hi}] (got {num}) · 超出合理範圍")
+
+    # 跨欄位邏輯檢查: 通過科目數不可大於修課科目數。
+    for approved, enrolled in _SUBSET_RULES:
+        try:
+            if float(record[approved]) > float(record[enrolled]):
+                errors.append(
+                    f"{approved} cannot exceed {enrolled} (approved can't be more than enrolled) "
+                    f"· 通過科目數不可大於修課科目數"
+                )
+        except (KeyError, TypeError, ValueError):
+            continue  # 缺值或非數值已在上方迴圈回報
     return errors
 
 

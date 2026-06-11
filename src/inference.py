@@ -2,12 +2,13 @@
 
 對應需求書第 10 節的流程:
 輸入 -> 檢查格式 -> 套用 Scaler -> 推論 -> 機率 -> 風險等級
+
+二分類: 模型輸出單一 logit，sigmoid 後即 P(Dropout)。
 """
 from __future__ import annotations
 
 from functools import lru_cache
 
-import numpy as np
 import torch
 
 from .model import load_checkpoint
@@ -37,16 +38,16 @@ def predict(record: dict, model_path: str = "models/model.pt",
     model, ckpt, scaler = _load(model_path, preprocessor_path)
     x = record_to_array(record, scaler)
     with torch.no_grad():
-        logits = model(torch.from_numpy(x))
-        probs = torch.softmax(logits, dim=1).numpy()[0]
+        logit = model(torch.from_numpy(x))
+        dropout_prob = float(torch.sigmoid(logit).item())
 
-    labels = ckpt.get("label_names", LABELS)
-    prob_map = {label: float(p) for label, p in zip(labels, probs)}
-    top_idx = int(np.argmax(probs))
-    dropout_prob = prob_map.get("Dropout", float(probs[0]))
+    # label_names = [負類(Graduate), 正類(Dropout)]
+    neg_label, pos_label = ckpt.get("label_names", LABELS)
+    prob_map = {pos_label: dropout_prob, neg_label: 1.0 - dropout_prob}
+    outcome = pos_label if dropout_prob >= 0.5 else neg_label
 
     return {
-        "outcome": labels[top_idx],
+        "outcome": outcome,
         "probabilities": prob_map,
         "dropout_probability": dropout_prob,
         "risk_level": risk_level(dropout_prob),

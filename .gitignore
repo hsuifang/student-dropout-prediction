@@ -12,6 +12,11 @@ models/*.joblib
 # 推論紀錄 (可能含敏感資訊)
 results/inference_log.jsonl
 
+# 原始 / 前處理後的學生資料 (含敏感屬性，不入庫)
+data.csv
+*_scaled.csv
+notebooks/*.csv
+
 # 系統檔
 .DS_Store
 .ipynb_checkpoints/
