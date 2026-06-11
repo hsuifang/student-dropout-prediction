@@ -4,6 +4,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# 更新底層 OS 套件，清掉基底映像可修補的 CVE
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+
 # 先裝 CPU-only torch（伺服器多為 CPU 推論；避免抓進數 GB 的 CUDA 函式庫）
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 
@@ -19,6 +22,9 @@ COPY . .
 #   - models/model.pt 已存在（你先跑過 export_model）→ 直接用真實 ensemble
 #   - 否則 fallback 烤一個 placeholder，讓映像仍能啟動 demo
 RUN [ -f models/model.pt ] || python -m scripts.train_placeholder
+
+# inference log 目錄設為可寫（HF Spaces 等以非 root 執行時也能寫入）
+RUN mkdir -p results && chmod -R 777 results
 
 EXPOSE 8501
 
