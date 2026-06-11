@@ -145,9 +145,10 @@
   **負責任 AI 核心原則（Human-in-the-loop）**：模型的預測結果與風險機率僅作為校園一線輔導人員的「輔助參考線索」。最終的關懷介入決策、實質因應措施與行政判斷，必須保留 100% 的人工審核與專業導師評估。
 
 - **Deployment status**: 
-  * 🟡 **Status**: `Contract-ready`（模型已訓練、推論介面已串通，尚差 1 步落盤）
-  * **已完成**：5-Fold 交叉驗證與去偏誤評估通過（整合 FPR Gap < 10%）；`src/` 模型契約（14 特徵、二分類、checkpoint 格式）與 Streamlit 推論介面已用 placeholder 跑通。
-  * **待完成（1 步）**：將訓練好的權重以 `save_checkpoint(...)` 輸出為 `models/model.pt`、並存出對應 `preprocessor.joblib`，替換 placeholder 後即可上線，介面無需修改。
+  * 🟢 **Status**: `Deployed`（已上線）
+  * **線上展示**：Hugging Face Spaces — <https://huggingface.co/spaces/hsuifang/student-dropout-prediction>
+  * 正式 **5-fold MinDiff ensemble**（`model.pt` + `preprocessor.joblib`）已隨 repo 附上並 Docker 化部署（CPU torch，~1.76GB）；介面與推論層無需改動。
+  * 5-Fold 交叉驗證與去偏誤評估通過（整合 FPR Gap < 10%）。
 
 ---
 
