@@ -2,7 +2,8 @@
 
 **A Secure Deep Learning System for Predicting Students' Dropout and Academic Success**
 
-使用學生的入學、課業與背景資料，預測學生最後可能屬於 **Dropout / Enrolled / Graduate**，
+使用學生的入學、課業與背景資料，預測學生的學業結果。建模階段聚焦於最關鍵的
+**二分類任務（Dropout 退學 vs Graduate 畢業，已移除 Enrolled 在學樣本）**，
 並涵蓋 Explainability、Security、Fairness 與可操作的 Inference 介面。
 
 > 資料集：[UCI – Predict students' dropout and academic success](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success)
@@ -25,6 +26,13 @@ streamlit run app/streamlit_app.py
 
 > ⚠️ `models/model.pt` 目前為 **placeholder**（佔位模型），僅供串接介面與 demo。
 > 正式效能以組員 B 訓練的模型為準，替換 `models/model.pt` 即可，介面不需修改。
+
+### 介面預覽（Inference 介面）
+
+面向教師／導師的早期預警決策支援介面：左側輸入學生資料，右側即時呈現
+**風險等級 → 建議行動 → 主要風險因子 → 各類別機率**，並顯示使用限制與人工審核提醒。
+
+![Dropout Risk Prediction interface](results/main.png)
 
 ---
 
@@ -224,8 +232,9 @@ student-dropout-prediction/
   **負責任 AI 核心原則（Human-in-the-loop）**：模型的預測結果與風險機率僅作為校園一線輔導人員的「輔助參考線索」。最終的關懷介入決策、實質因應措施與行政判斷，必須保留 100% 的人工審核與專業導師評估。
 
 - **Deployment status**: 
-  * 🟢 **Status**: `Safe-to-Deploy`
-  * 5-Fold 交叉驗證與去偏誤壓力測試已全數通過。整合公平性指標已控制在安全線內（FPR Gap < 10%），符合 Responsible AI 實務部署規格。目前已完成與 API 端點對接，由 `src/schema.py` 進行動態版本管理。
+  * 🟡 **Status**: `Contract-ready`（模型已訓練、推論介面已串通，尚差 1 步落盤）
+  * **已完成**：5-Fold 交叉驗證與去偏誤評估通過（整合 FPR Gap < 10%）；`src/` 模型契約（14 特徵、二分類、checkpoint 格式）與 Streamlit 推論介面已用 placeholder 跑通。
+  * **待完成（1 步）**：將訓練好的權重以 `save_checkpoint(...)` 輸出為 `models/model.pt`、並存出對應 `preprocessor.joblib`，替換 placeholder 後即可上線，介面無需修改。
 
 ---
 
