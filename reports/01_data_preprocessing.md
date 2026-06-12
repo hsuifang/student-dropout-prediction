@@ -11,6 +11,7 @@
   - **專業處理決策**：為了聚焦於預測學生是否會走向「退學」的終極命運，本專案在載入資料時**實施了嚴格的資料純淨化，過濾移除處於模糊狀態的 `Enrolled` 樣本**。
   - **二元分類轉換**：將標籤轉換為正負樣本：`Dropout`（退學）為 `1`，`Graduate`（畢業）為 `0`。
   - **過濾後退學比例**：經移除 `Enrolled` 後，純淨訓練集的真實退學率（Base Rate）為 **39.15%**，屬於輕微不平衡資料，後續機器學習流程將透過分層切分與損失函數進行優化。
+![資料處理前後目標標籤分佈變化圖](results/target_distribution_processing.png) **
 
 ---
 
@@ -46,11 +47,14 @@
 | `financial_status` | 學生財務綜合狀態<br>(Financial Status) | $\text{是否為獎學金持有者 (Scholarship holder)} + \text{學費是否按時繳納 (Tuition fees paid)}$ |
 
 ### 3.2 機器學習特徵篩選（Feature Selection）
-為了確保模型的輕量化與高解釋性，專案採取了結合「機器學習解釋性」與「統計學資訊量」的四階段嚴格篩選流程：
+為了確保模型的輕量化與高解釋性，專案採取了結合「機器學習解釋性」與「統計學資訊量」的四階段嚴格篩選流程，將初始精選的 11 個原始特徵，最終收斂至 9 個核心可控特徵：
 
 1. **階段一（訓練基準 XGBoost 模型）**：首先建立一個基於樹模型的初始分類器（XGBoost Model），以此作為特徵重要性分析的算力底座與基礎。
 2. **階段二（計算 SHAP 歸因值排名）**：引入 SHAP (SHapley Additive exPlanations) 賽局理論歸因分析，導出前 20 大對模型預測影響力最深遠的特徵排名（Top 20 Features）。由 SHAP 密集度分佈圖可觀察到：`Curricular units 2nd sem (approved)` 以及自創的財務狀態與學分變動，其 SHAP 值極化表現最為顯著。
-3. **階段三（人工篩選可控特徵）**：在 Top 20 變數中，主動過濾掉無法透過學校政策改變的既定事實（如父母職業、出生地等），**手動精選出精選出 11 個具有「人類或政策干預潛力」（Potential for human or policy intervention）的學業表現與財務變數**。
+
+![XGBoost 特徵 SHAP 歸因分佈圖](results/shap_summary_plot.png)
+
+3. **階段三（人工篩選可控特徵）**：在 Top 20 變數中，主動過濾掉無法透過學校政策改變的既定事實（如父母職業、出生地等），**手動精選出 11 個具有「人類或政策干預潛力」（Potential for human or policy intervention）的學業表現與財務變數**。
 4. **階段四（互資訊分析驗證）**：為強化篩選特徵的可靠度並支持後續的交叉驗證，進一步計算精選特徵與目標標籤（Target Variable）之間的**互資訊得分（Mutual Information Scores）**，最終敲定進入核心訓練模型的特徵矩陣：
 
 | 篩選特徵 (Feature) | 互資訊得分 (Mutual Information) |
@@ -80,37 +84,7 @@
 
 ---
 
-## 4. 特徵篩選與選擇策略（Feature Selection）
-為了確保模型的輕量化與高解釋性，專案採取了結合「機器學習解釋性」與「統計學資訊量」的四階段嚴格篩選流程：
-
-### 4.1 階段一：訓練基準 XGBoost 模型
-- 首先建立一個基於樹模型的初始分類器（XGBoost Model），以此作為特徵重要性分析的算力底座與基礎。
-
-### 4.2 階段二：計算 SHAP 歸因值排名（SHAP Value Rankings）
-- 引入 SHAP (SHapley Additive exPlanations) 賽局理論歸因分析，導出前 20 大對模型預測影響力最深遠的特徵排名（Top 20 Features）。
-- 由 SHAP 密集度分佈圖（SHAP Summary Plot）可觀察到：`Curricular units 2nd sem (approved)` 以及自創的財務狀態與學分變動，其 SHAP 值極化表現最為顯著。
-
-### 4.3 階段三：人工篩選具備干預價值的「可控特徵」（Actionable Features）
-- **專業決策**：在 Top 20 變數中，主動過濾掉無法透過學校政策改變的既定事實（如父母職業、出生地等），**手動精選出具有「人類或政策干預潛力」（Potential for human or policy intervention）的學業表現與財務變數**。
-
-### 4.4 階段四：互資訊分析（Mutual Information Analysis）
-- 為強化篩選特徵的可靠度並支持後續的交叉驗證，進一步計算精選特徵與目標標籤（Target Variable）之間的**互資訊得分（Mutual Information Scores）**，最終敲定進入核心訓練模型的特徵矩陣：
-
-| 篩選特徵 (Feature) | 互資訊得分 (Mutual Information) |
-| :--- | :--- |
-| `Curricular units 2nd sem (approved)` | 0.309975 |
-| `Curricular units 1st sem (approved)` | 0.246007 |
-| `Curricular units 2nd sem (grade)` | 0.232004 |
-| `Curricular units 1st sem (grade)` | 0.180949 |
-| `Tuition fees up to date` | 0.080529 |
-| `Scholarship holder` | 0.049612 |
-| `Application mode` | 0.049026 |
-| `Previous qualification (grade)` | 0.043111 |
-| `Admission grade` | 0.038124 |
-
----
-
-## 5. Data Leakage（資訊洩漏）嚴格檢查
+## 4. Data Leakage（資訊洩漏）嚴格檢查
 資料洩漏是機器學習專案失效的首要原因。本專案進行了最高規格的防禦：
 
 - **標準化洩漏防禦（關鍵步驟）**：
@@ -120,8 +94,8 @@
 
 ---
 
-## 6. 敏感屬性與公平性基礎定義
-為響應需求書對於模型公平性（Fairness）的嚴格要求，組員 A 在前處理階段確立了關鍵的社會經濟敏感屬性：
+## 5. 敏感屬性與公平性基礎定義
+為響應需求書對於模型公平性（Fairness）的嚴格要求，在前處理階段確立了關鍵的社會經濟敏感屬性：
 
 - **核心敏感特徵**：`Tuition fees up to date`（學費是否按時繳納）。
 - **基準值（Median）界定**：在訓練集上計算該欄位的中央基準值（Median），以此作為切分弱勢群體與對照群體的指標。
