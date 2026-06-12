@@ -11,7 +11,7 @@
   - **專業處理決策**：為了聚焦於預測學生是否會走向「退學」的終極命運，本專案在載入資料時**實施了嚴格的資料純淨化，過濾移除處於模糊狀態的 `Enrolled` 樣本**。
   - **二元分類轉換**：將標籤轉換為正負樣本：`Dropout`（退學）為 `1`，`Graduate`（畢業）為 `0`。
   - **過濾後退學比例**：經移除 `Enrolled` 後，純淨訓練集的真實退學率（Base Rate）為 **39.15%**，屬於輕微不平衡資料，後續機器學習流程將透過分層切分與損失函數進行優化。
-![資料處理前後目標標籤分佈變化圖](results/target_distribution_processing.png) **
+![資料處理前後目標標籤分佈變化圖](results/target_distribution_processing.jpg) **
 
 ---
 
@@ -52,7 +52,7 @@
 1. **階段一（訓練基準 XGBoost 模型）**：首先建立一個基於樹模型的初始分類器（XGBoost Model），以此作為特徵重要性分析的算力底座與基礎。
 2. **階段二（計算 SHAP 歸因值排名）**：引入 SHAP (SHapley Additive exPlanations) 賽局理論歸因分析，導出前 20 大對模型預測影響力最深遠的特徵排名（Top 20 Features）。由 SHAP 密集度分佈圖可觀察到：`Curricular units 2nd sem (approved)` 以及自創的財務狀態與學分變動，其 SHAP 值極化表現最為顯著。
 
-![XGBoost 特徵 SHAP 歸因分佈圖](results/shap_summary_plot.png)
+![XGBoost 特徵 SHAP 歸因分佈圖](results/shap_summary_plot.jpg)
 
 3. **階段三（人工篩選可控特徵）**：在 Top 20 變數中，主動過濾掉無法透過學校政策改變的既定事實（如父母職業、出生地等），**手動精選出 11 個具有「人類或政策干預潛力」（Potential for human or policy intervention）的學業表現與財務變數**。
 4. **階段四（互資訊分析驗證）**：為強化篩選特徵的可靠度並支持後續的交叉驗證，進一步計算精選特徵與目標標籤（Target Variable）之間的**互資訊得分（Mutual Information Scores）**，最終敲定進入核心訓練模型的特徵矩陣：
