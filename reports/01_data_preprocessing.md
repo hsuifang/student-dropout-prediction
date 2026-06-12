@@ -43,7 +43,7 @@
 1. **階段一（全域 XGBoost 模型訓練）**：將原始的 **36 個特徵** 全部餵進初始分類模型（XGBoost），作為特徵重要性分析的算力底座。
 2. **階段二（計算 SHAP 歸因值排名）**：引入 SHAP (SHapley Additive exPlanations) 賽局理論歸因分析，導出前 20 大對模型預測影響力最深遠的特徵排名（Top 20 Features）。由數值排名與密集度分佈圖可觀察到，第二學期通過學分數與學費按時繳納（`Tuition fees up to date`）具備最強烈決策重要性。
 
-![XGBoost 特徵 SHAP 歸因分佈圖](../results/shap_summary_plot.png)
+![XGBoost 特徵 SHAP 歸因分佈圖](../results/shap_summary_plot.jpg)
 
 3. **階段三（人工精選 11 個可控原始特徵）**：在 SHAP 前 20 名變數中，主動過濾掉無法透過學校政策改變的既定背景事實（如大環境 GDP、失業率、父母職業等），**最終手動精選出 11 個具有「人為或政策干預潛力」（Potential for human or policy intervention）的核心原始特徵**：
 
