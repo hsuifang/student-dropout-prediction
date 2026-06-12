@@ -30,7 +30,7 @@
 * **處理後資料規模（Processed Dataset Size）**：
   * **特徵數量（Features）**：14 個最終模型特徵（含 11 個精選原始特徵與 3 個自創特徵）
   * **目標類別（Target Classes）**：2 類（二元分類：Dropout / Graduate）
-  * *註：詳細的資料清洗、特徵篩選與特徵工程實作細節，請參閱 [資料處理說明檔案](./Data_Preprocessing.md)。*
+  * *註：詳細的資料清洗、特徵篩選與特徵工程實作細節，請參閱 [01_data_preprocessing.md](./reports/01_data_preprocessing.md)。*
 
 ---
 
@@ -48,13 +48,20 @@
 
 ---
 
-* **資料前處理與特徵工程概述（Data preprocessing & Feature engineering overview）**：
-  為了提高模型精準度並兼顧公平性，我們對原始資料進行了以下優化**（完整技術細節與程式碼請詳見 [01_data_preprocessing.md](./reports/01_data_preprocessing.md)）**：
-  1. **資料清洗**：過濾與主要預測目標無關的 `Enrolled`（在學）樣本。
-  2. **標籤轉換**：將原始三分類目標轉換為二元分類問題。
-  3. **特徵優化**：基於領域知識與統計相關性，將 36 個原始特徵精選並擴充為 14 個核心模型特徵（包含 3 個捕捉學生學習動態的自創特徵）。
-  4. **標準化處理**：對數值型特徵進行標準化（Feature Scaling），以利神經網路與線性模型收斂。
-  5. **驗證機制**：嚴格切分訓練集與測試集，並採用 5 折分層交叉驗證（5-Fold Stratified Cross-Validation）確保模型泛化能力。
+### 資料前處理與特徵工程概述（Data Preprocessing & Feature Engineering Overview）
+
+為了提高模型精準度並兼顧敏感屬性的公平性，我們對原始資料進行了以下優化**（完整技術細節與程式碼請詳見 01_data_preprocessing.md）**：
+
+* **資料清洗（Data Filtering）**：
+  過濾與主要預測目標無關的 `Enrolled`（在學）樣本，專注於已 Graduation（畢業）與 Dropout（退學）的確定狀態分類。
+* **標籤轉換（Target Encoding）**：
+  將原始文字型的 `Target` 三分類欄位，轉換為二元分類標籤（`Dropout` 映射為 `1`，`Graduate` 映射為 `0`）。
+* **特徵優化（Feature Engineering）**：
+  基於領域知識與相關性篩選，從 36 個原始特徵中精選出 11 個關鍵特徵，並自創 3 個捕捉學生學習動態的強效衍生特徵（*第一學期及格率*、*第二學期及格率*、*兩學期成績變化*），整合為 14 個核心模型特徵。
+* **標準化處理（Feature Scaling）**：
+  對數值型特徵進行去均值與方差歸一化（Z-score 標準化），以利神經網路與線性模型收斂；並**嚴格分離訓練集與測試集的擬合統計量，防止資訊洩漏（Data Leakage）**。
+* **驗證機制（Validation Setup）**：
+  嚴格切分 80% 訓練集與 20% 獨立測試集，並在訓練階段採用 **5 折分層交叉驗證（5-Fold Stratified Cross-Validation）**，在保持真實世界退學比例（39.15%）的同時，確保模型的泛化能力。
 
 ---
 
