@@ -35,52 +35,44 @@
 
 ## 3. 前處理與特徵篩選步驟
 
-本專案拒絕盲目餵入原始特徵，規劃了完整的「特徵工程設計」、「進階特徵篩選」到「資料切分與標準化」的流程：
+本專案拒絕盲目餵入原始數據，而是規劃了一套**「全域篩選 ➔ 可控性收斂 ➔ 特徵升維」**的一體化管線。資料流依循：**原始 36 欄 ➔ SHAP 前 20 名 ➔ 人為可干涉 11 欄 ➔ 額外自創 3 欄 ➔ 最終 14 維特徵空間** 進行演進。
 
-### 3.1 特徵工程設計（Feature Engineering Design）
-為了深化模型對學生學業連續性與經濟壓力的捕捉，自創了以下 3 組核心特徵：
+### 3.1 機器學習特徵篩選（Feature Selection）
+為了建構具備高解釋性且能實質指導學校政策的模型，特徵篩選經歷以下嚴格階段：
 
-| 衍生特徵 (Feature) | 核心核心含意 (Meaning) | 建構計算方法 (Method) |
+1. **階段一（全域 XGBoost 模型訓練）**：將原始的 **36 個特徵** 全部餵進初始分類模型（XGBoost），作為特徵重要性分析的算力底座。
+2. **階段二（計算 SHAP 歸因值排名）**：引入 SHAP (SHapley Additive exPlanations) 賽局理論歸因分析，導出前 20 大對模型預測影響力最深遠的特徵排名（Top 20 Features）。由數值排名與密集度分佈圖可觀察到，第二學期通過學分數與學費按時繳納（`Tuition fees up to date`）具備最強烈決策重要性。
+
+![XGBoost 特徵 SHAP 歸因分佈圖](../results/shap_summary_plot.png)
+
+3. **階段三（人工精選 11 個可控原始特徵）**：在 SHAP 前 20 名變數中，主動過濾掉無法透過學校政策改變的既定背景事實（如大環境 GDP、失業率、父母職業等），**最終手動精選出 11 個具有「人為或政策干預潛力」（Potential for human or policy intervention）的核心原始特徵**：
+
+| 篩選原始特徵 (Feature) | SHAP 排名 (Rank) | 互資訊得分 (MI) | 政策干預切入點 (Policy Intervention Point) |
+| :--- | :--- | :--- | :--- |
+| `Curricular units 2nd sem (approved)` | 1 | 0.309975 | 課業預警、第二學期學業輔導 |
+| `Curricular units 1st sem (approved)` | 2 | 0.246007 | 寒假銜接補強、適應性輔導 |
+| `Tuition fees up to date` | 3 | 0.080529 | 提供分期付款、校內緊急紓困 |
+| `Curricular units 1st sem (enrolled)` | 4 | -- | 轉化為第一學期通過率之基底分母 |
+| `Curricular units 2nd sem (grade)` | 6 | 0.232004 | 成績滑落變動預警機制 |
+| `Scholarship holder` | 7 | 0.049612 | 獎助學金名額優化分配 |
+| `Admission grade` | 8 | 0.038124 | 入學成績與在校表現關聯分析 |
+| `Curricular units 2nd sem (enrolled)` | 11 | -- | 轉化為第二學期通過率之基底分母 |
+| `Previous qualification (grade)` | 15 | 0.043111 | 入學前基礎背景考核 |
+| `Application mode` | 19 | 0.049026 | 入學管道適應性追蹤 |
+| `Curricular units 1st sem (grade)` | -- | 0.180949 | 成績變動率之基準減項 |
+
+### 3.2 特徵工程設計（Feature Engineering Design）
+在確定上述 11 個核心原始特徵後，為了深化模型對「學生學業動態變動」的捕捉，管線（收錄於 [src/preprocessing.py](../src/preprocessing.py)）進一步利用其中的學分註冊與成績欄位，**額外衍生出 3 組強力強力特徵**，使最終餵入模型的特徵空間達到 **14 維**：
+
+| 衍生自創特徵 (Engineered Feature) | 核心含意 (Meaning) | 建構計算方法 (Method) |
 | :--- | :--- | :--- |
 | `1st_sem_pass_rate`<br>`2nd_sem_pass_rate` | 學期課程通過率<br>(Course Pass Rate) | $\frac{\text{該學期通過之學分數 (approved)}}{\text{該學期註冊之總學分數 (enrolled)} + 10^{-8}}$ |
-| `grade_change` | 學期成績趨勢變動<br>(Grade Variation) | $\text{第二學期總分 (2nd sem grade)} - \text{第一學期總分 (1st sem grade)}$<br>*捕捉學習曲線是進步或下滑（高風險）。* |
+| `grade_change` | 學期成績趨勢變動<br>(Grade Variation) | $\text{第二學期分數 (2nd sem grade)} - \text{第一學期分數 (1st sem grade)}$ |
 | `financial_status` | 學生財務綜合狀態<br>(Financial Status) | $\text{是否為獎學金持有者 (Scholarship holder)} + \text{學費是否按時繳納 (Tuition fees paid)}$ |
 
-### 3.2 機器學習特徵篩選（Feature Selection）
-為了確保模型的輕量化與高解釋性，專案採取了結合「機器學習解釋性」與「統計學資訊量」的四階段嚴格篩選流程，將初始精選的 11 個原始特徵，最終收斂至 9 個核心可控特徵：
-
-1. **階段一（訓練基準 XGBoost 模型）**：首先建立一個基於樹模型的初始分類器（XGBoost Model），以此作為特徵重要性分析的算力底座與基礎。
-2. **階段二（計算 SHAP 歸因值排名）**：引入 SHAP (SHapley Additive exPlanations) 賽局理論歸因分析，導出前 20 大對模型預測影響力最深遠的特徵排名（Top 20 Features）。由 SHAP 密集度分佈圖可觀察到：`Curricular units 2nd sem (approved)` 以及自創的財務狀態與學分變動，其 SHAP 值極化表現最為顯著。
-
-![XGBoost 特徵 SHAP 歸因分佈圖](../results/shap_summary_plot.jpg)
-
-3. **階段三（人工篩選可控特徵）**：在 Top 20 變數中，主動過濾掉無法透過學校政策改變的既定事實（如父母職業、出生地等），**手動精選出 11 個具有「人類或政策干預潛力」（Potential for human or policy intervention）的學業表現與財務變數**。
-4. **階段四（互資訊分析驗證）**：為強化篩選特徵的可靠度並支持後續的交叉驗證，進一步計算精選特徵與目標標籤（Target Variable）之間的**互資訊得分（Mutual Information Scores）**，最終敲定進入核心訓練模型的特徵矩陣：
-
-| 篩選特徵 (Feature) | 互資訊得分 (Mutual Information) |
-| :--- | :--- |
-| `Curricular units 2nd sem (approved)` | 0.309975 |
-| `Curricular units 1st sem (approved)` | 0.246007 |
-| `Curricular units 2nd sem (grade)` | 0.232004 |
-| `Curricular units 1st sem (grade)` | 0.180949 |
-| `Tuition fees up to date` | 0.080529 |
-| `Scholarship holder` | 0.049612 |
-| `Application mode` | 0.049026 |
-| `Previous qualification (grade)` | 0.043111 |
-| `Admission grade` | 0.038124 |
-
-### 3.3 資料標準化（Normalization）
+### 3.3 資料標準化與嚴格的 Train / Test 切分
 - 使用 `sklearn.preprocessing.StandardScaler` 進行 $Z$-Score 標準化（將資料平移至均值 $\mu=0$，標準差 $\sigma=1$）。
 - 轉換後保留 DataFrame 的欄位名稱（Column Names），以利後續階段進行 MinDiff 敏感欄位對齊與公平性審計。
-
-### 3.4 嚴格的 Train / Test 切分
-為了模擬真實世界的泛化表現，資料集進行了一次性黃金獨立測試集切分：
-- **切分比例**：Train (80%) / Test (20%)。
-- **分層抽樣（Stratified Split）**：啟用 `stratify=y`，確保訓練集與測試集中的退學比例完全一致，皆維持在 **39.15%**。
-- **隨記憶種子（Random State）**：統一設定為 `42`，確保數據流可重複再現。
-- **切分後規模**：
-  - ➔ 成功生成 `train_scaled.csv` (樣本數: **2,904**)
-  - ➔ 成功生成 `test_scaled.csv` (樣本數: **726**)
 
 ---
 
@@ -103,12 +95,3 @@
   - **敏感群體（Sens Group）**：標準化後的學費特徵值 < 訓練集基準值。代表「**未能按時繳納學費的經濟弱勢學生**」。
   - **對照群體（Ref Group）**：標準化後的學費特徵值 $\ge$ 訓練集基準值。代表「**有按時繳納學費的學生**」。
 - **前處理產出承接**：此劃分矩陣與標準化特徵將直接落盤儲存，承接給後續的邏輯斯迴歸（Baseline）、深度神經網路（MLP）以及終極的 **MinDiff 仿射對齊公平性修復演算法**，用於追蹤與消除兩組之間的偽陽性率差距（FPR Gap）。
-
----
-
-## 產出檔案與路徑
-- **特徵規格結構定義**：[src/schema.py](src/schema.py)
-- **前處理與特徵工程主程式**：`src/prepare_data.py` (執行 `prepare_and_save_pure_datasets('data.csv')`)
-- **落盤落庫數據**（純淨且標準化完成，含特徵工程欄位）：
-  - 訓練總集：`train_scaled.csv`（規模：2904 行 $\times$ 15 欄，含 `Target_Label`）
-  - 黃金獨立測試集：`test_scaled.csv`（規模：726 行 $\times$ 15 欄，含 `Target_Label`）
