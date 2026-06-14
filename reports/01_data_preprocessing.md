@@ -44,7 +44,7 @@
 | `Curricular units 1st sem (grade)` | -- | 0.180949 | 成績變動率之基準減項 |
 
 ### 2.2 特徵工程設計（Feature Engineering Design）
-在確定上述 11 個核心原始特徵後，為了深化模型對「學生學業動態變動」的捕捉，管線（收錄於 [src/preprocessing.py](../src/preprocessing.py)）進一步利用其中的學分註冊與成績欄位，**額外衍生出 3 組強力強力特徵**，使最終餵入模型的特徵空間達到 **14 維**：
+在確定上述 11 個核心原始特徵後，為了深化模型對「學生學業動態變動」的捕捉，管線（收錄於 [src/preprocessing.py](../src/preprocessing.py)）進一步利用其中的學分註冊與成績欄位，**額外衍生出 3 組強力特徵**，使最終餵入模型的特徵空間達到 **14 維**：
 
 | 衍生自創特徵 (Engineered Feature) | 核心含意 (Meaning) | 建構計算方法 (Method) |
 | :--- | :--- | :--- |
