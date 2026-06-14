@@ -1,5 +1,7 @@
 # 學生退學與學業成果預測系統
 
+[👉 English Version Readme.md](./README_en.md)
+
 **A Secure Deep Learning System for Predicting Students' Dropout and Academic Success**
 
 使用學生的入學、課業與背景資料，預測學生的學業結果。建模階段聚焦於最關鍵的
@@ -266,7 +268,7 @@ docker run -d -p 8501:8501 --name dropout dropout-app
 student-dropout-prediction/
 ├── README.md                # 含 Data Card / Model Card / Security（見下方）
 ├── requirements.txt
-├── src/                     # 共用模組 (模型契約)
+├── src/                     # 共用模組
 │   ├── schema.py            # ★ 唯一真實來源：特徵順序、標籤、敏感屬性、版本
 │   ├── model.py             # MLP 定義 + checkpoint 存取格式
 │   ├── preprocessing.py     # scaler 建立/載入 (防 training-serving skew)
@@ -275,7 +277,7 @@ student-dropout-prediction/
 │   ├── interpret.py         # 把模型輸出翻成教師可讀的風險因子 / 建議行動
 │   └── security.py          # Input Validation / 去識別化 / Inference Log
 ├── scripts/
-│   ├── train_placeholder.py # 佔位模型 (合成資料, demo 用)
+│   ├── train_placeholder.py # 佔位模型 (合成資料)
 │   ├── export_model.py      # 正式模型 (真實資料, 5-fold MinDiff ensemble)
 │   └── plot_global_importance.py # 全域解釋圖 -> results/global_importance.png
 ├── app/
