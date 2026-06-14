@@ -14,7 +14,7 @@
 
 ## 📋 Data Card（組員 A 113AB8049 填寫）
 
-### Data Card（資料卡）
+### Data Card
 
 * **資料集名稱（Dataset name）**：
   Predict Students' Dropout and Academic Success
